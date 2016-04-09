@@ -5,7 +5,7 @@ Base = declarative_base()
 meta = Base.metadata
 
 
-class artist(Base):
+class Artist(Base):
     __tablename__ = 'artists'
 
     id = Column(Integer, primary_key=True)
