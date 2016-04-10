@@ -57,6 +57,8 @@ class Release(Base):
 
     artist = relationship('Artist', back_populates='releases')
     tracks = relationship('Track', back_populates='release')
+    genres = relationship('Genre', secondary=release_genre_association)
+    styles = relationship('Style', secondary=release_style_association)
 
 
 class Track(Base):
@@ -70,8 +72,6 @@ class Track(Base):
     artists = Column(String)
 
     release = relationship('Release', back_populates='tracks')
-    genres = relationship('Genre', secondary=release_genre_association)
-    styles = relationship('Style', secondary=release_style_association)
 
 
 class Label(Base):
