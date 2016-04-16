@@ -36,6 +36,9 @@ class Artist(Base):
 
     releases = relationship('Release', back_populates='artist')
 
+    def __repr__(self):
+        return self.name
+
 
 class Release(Base):
     __tablename__ = 'releases'
@@ -60,6 +63,9 @@ class Release(Base):
     genres = relationship('Genre', secondary=release_genre_association)
     styles = relationship('Style', secondary=release_style_association)
 
+    def __repr__(self):
+        return self.title
+
 
 class Track(Base):
     __tablename__ = 'tracks'
@@ -73,6 +79,9 @@ class Track(Base):
 
     release = relationship('Release', back_populates='tracks')
 
+    def __repr__(self):
+        return self.title
+
 
 class Label(Base):
     __tablename__ = 'labels'
@@ -84,6 +93,9 @@ class Label(Base):
     description = Column(String)
     urls = Column(String)
 
+    def __repr__(self):
+        return self.name
+
 
 class Genre(Base):
     __tablename__ = 'genres'
@@ -91,9 +103,15 @@ class Genre(Base):
     id = Column(Integer, primary_key=True, unique=True)
     genre = Column(String)
 
+    def __repr__(self):
+        return self.genre
+
 
 class Style(Base):
     __tablename__ = 'styles'
 
     id = Column(Integer, primary_key=True, unique=True)
     style = Column(String)
+
+    def __repr__(self):
+        return self.style
