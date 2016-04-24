@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Table, Column, Integer, String, ForeignKey
+from sqlalchemy import Table, Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 
 Base = declarative_base()
@@ -26,6 +26,7 @@ class Artist(Base):
 
     id = Column(Integer, primary_key=True, unique=True)
     name = Column(String)
+    searched_for = Column(Boolean, nullable=False, default=False)
 
     discogs_id = Column(Integer, unique=True)
     discogs_name = Column(String)

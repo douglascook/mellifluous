@@ -1,17 +1,14 @@
 import os
 import glob
-import logging
 
 import sqlalchemy as sqla
 
 from models import meta, Artist, Release
+from log import logger
 
 
 DIRECTORY = '/Users/Dug/Music/iTunes/iTunes Music/'
 DB_URL = 'sqlite:///music.sqlite'
-
-log_format = '%(asctime)s %(levelname)s:%(message)s'
-logging.basicConfig(format=log_format, level=logging.INFO)
 
 engine = sqla.create_engine(DB_URL)
 Session = sqla.orm.sessionmaker(bind=engine)
@@ -48,7 +45,7 @@ def record_artists_and_releases():
 
         artists.append(artist)
 
-    logging.info('Adding {} artists with {} releases'.format(
+    logger.info('Adding {} artists with {} releases'.format(
         total_artists, total_releases))
 
     session.add_all(artists)

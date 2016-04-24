@@ -1,40 +1,40 @@
-import logging
 import re
 
 import discogs_client
-import auth
 
+import auth
+from log import logger
 from models import meta, Artist
 from db_setup import Session
 
-
-logger = logging.getLogger('logalog')
-logger.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s %(levelname)s:%(message)s')
-handler = logging.StreamHandler()
-handler.setLevel(logging.DEBUG)
-handler.setFormatter(formatter)
-logger.addHandler(handler)
 
 discogs = discogs_client.Client('MetadataLibrarian/0.1', user_token=auth.TOKEN)
 session = Session()
 
 
-def boom():
+def boom(refresh_all=False):
     artists = session.query(Artist)
+    if not refresh_all:
+        artists = artists.filter(Artist.searched_for.is_(False))
 
     for artist in artists:
-        for release in artist.releases:
-            logger.info('Searching for {} - {}'.format(artist.name, release.title))
+        update_metadata(artist)
+        artist.searched_for = True
+        session.commit()
 
-            hit = search(artist.name, release.title)
-            if hit:
-                if normalise(hit.artists[0].name) == normalise(artist.name):
-                    logger.debug('Found one!')
-                    update_artist(artist, hit.artists[0])
-                    update_release(release, hit)
-                    import ipdb; ipdb.set_trace()
-                    continue
+
+def update_metadata(artist):
+    """Search for a matching artist in discogs and update the record."""
+    logger.info('Updating {}'.format(artist.name))
+
+    for release in artist.releases:
+        hit = search(artist.name, release.title)
+        if hit:
+            if normalise(hit.artists[0].name) == normalise(artist.name):
+                logger.debug('Found one!')
+                update_artist(artist, hit.artists[0])
+                update_release(release, hit)
+                break
 
 
 def search(artist, release):
@@ -43,6 +43,7 @@ def search(artist, release):
     Querying by title should hopefully return more relevant results.
     """
     search_string = '{} - {}'.format(artist, release)
+    logger.info('Searching for {}'.format(search_string))
     results = discogs.search(search_string, type='title')
 
     return select_main_release(results)
@@ -64,7 +65,6 @@ def select_main_release(results):
                 logger.info('Master has no main release :(')
 
     logger.debug('No release found.')
-    return None
 
 
 def normalise(string):
