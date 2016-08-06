@@ -8,7 +8,7 @@ from models import meta, Artist
 from db_setup import Session
 
 
-discogs = discogs_client.Client('MetadataLibrarian/0.1', user_token=auth.TOKEN)
+discogs = discogs_client.Client('MetadataLibrarian/0.1', user_token=auth.DISCOGS_TOKEN)
 session = Session()
 
 
