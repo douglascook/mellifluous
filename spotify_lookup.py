@@ -5,14 +5,40 @@ import requests
 import auth
 
 
-def get_token():
-    """Return authentication token generated using client credentials flow."""
-    endpoint = 'https://accounts.spotify.com/api/token'
-    payload = {'grant_type': 'client_credentials'}
+def get_playlists(user_id):
+    """Return list of playlists for this user."""
+    auth_token = get_auth_token()
+    auth_string = 'Bearer {}'.format(auth_token)
 
-    auth_string = '{}:{}'.format(auth.SPOTIFY_CLIENT_ID, auth.SPOTIFY_TOKEN)
-    auth_encoded = base64.b64encode(auth_string.encode())
-    header = {'Authorization': 'Basic {}'.format(auth_encoded.decode())}
+    endpoint = 'https://api.spotify.com/v1/users/{}/playlists'.format(user_id)
+    header = {'Authorization': auth_string}
+
+    return requests.get(endpoint, headers=header)
+
+
+def get_saved_tracks():
+    """Return all starred tracks for authenticated user."""
+    auth_token = get_auth_token()
+    auth_string = 'Bearer {}'.format(auth_token)
+
+    endpoint = 'https://api.spotify.com/v1/me/tracks'
+    header = {'Authorization': auth_string}
+
+    return requests.get(endpoint, headers=header)
+
+
+def get_auth_token():
+    """Return authentication token generated using client credentials flow.
+
+    This authentication method does not give access to user data endpoints.
+    """
+    tokens = '{}:{}'.format(auth.SPOTIFY_CLIENT_ID, auth.SPOTIFY_TOKEN)
+    encoded = base64.b64encode(tokens.encode())
+    auth_string = 'Basic {}'.format(encoded.decode())
+
+    endpoint = 'https://accounts.spotify.com/api/token'
+    header = {'Authorization': auth_string}
+    payload = {'grant_type': 'client_credentials'}
 
     response = requests.post(endpoint, headers=header, data=payload)
 
@@ -20,4 +46,4 @@ def get_token():
 
 
 if __name__ == '__main__':
-    token = get_token()
+    get_saved_tracks()
