@@ -69,8 +69,10 @@ def select_main_release(results):
 
 def normalise(string):
     """Normalise a string for comparison with search results."""
+    logger.debug('Original string {}'.format(string))
     string = string.lower()
     string = re.sub('\W+', '', string).lower()
+    logger.debug('Normalised string {}'.format(string))
 
     return string
 
