@@ -1,4 +1,5 @@
 import base64
+import json
 
 import requests
 
@@ -68,15 +69,25 @@ def build_auth_header():
 def get_saved_tracks(user_token):
     """Return all starred tracks for authenticated user."""
     auth_string = 'Bearer {}'.format(user_token)
-
     endpoint = 'https://api.spotify.com/v1/me/tracks'
     header = {'Authorization': auth_string}
-    payload = {'limit': 200}
 
-    response = requests.get(endpoint, headers=header, params=payload)
-    import ipdb; ipdb.set_trace()
+    tracks = get_next_page(endpoint, header, None)
 
-    return response
+    return tracks
+
+
+def get_next_page(endpoint, header, items):
+    """Recurse through a spotify paging object"""
+    if not items:
+        items = []
+    if endpoint:
+        response = requests.get(endpoint, headers=header)
+        data = response.json()
+        items.extend(data['items'])
+        return get_next_page(data['next'], header, items)
+
+    return items
 
 
 if __name__ == '__main__':
