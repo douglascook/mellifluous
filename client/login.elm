@@ -1,13 +1,18 @@
-import Html exposing (Html, Attribute, div, input, text)
+import Html exposing (Html, Attribute, div, input, button, text)
 import Html.App as App
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onInput, onClick)
 
 import String
 
 
 main =
-  App.beginnerProgram { model = model, view = view, update = update }
+  App.program
+    { init = init,
+      view = view,
+      update = update,
+      subscriptions = subscriptions
+    }
 
 
 -- MODEL
@@ -18,24 +23,42 @@ type alias Model =
 
 model : Model
 model =
-  { username = "",
-    password = "" }
+  Model "" ""
+
+
+-- INIT
+
+init: (Model, Cmd Msg)
+init =
+  (model, Cmd.none)
 
 
 -- UPDATE
 
 type Msg =
   Username String |
-  Password String
+  Password String |
+  Submit
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     Username username  ->
-      { model | username = username }
+      ( { model | username = username }, Cmd.none )
 
     Password password ->
-      { model | password = password }
+      ( { model | password = password }, Cmd.none )
+
+    Submit ->
+      ( { model | password = "noooooooooo"}, Cmd.none )
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+  Sub.none
 
 
 -- VIEW
@@ -44,5 +67,7 @@ view: Model -> Html Msg
 view model =
   div [] [
     div [] [ input [placeholder "Username", onInput Username] [] ],
-    div [] [ input [placeholder "Password", onInput Password] [] ]
+    div [] [ input [placeholder "Password", onInput Password] [] ],
+    div [] [ text (toString model.password) ],
+    button [ onClick Submit ] [ text "Log in" ]
   ]
