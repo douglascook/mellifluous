@@ -16,17 +16,6 @@ def get_playlists(user_id):
     return requests.get(endpoint, headers=header)
 
 
-def get_saved_tracks():
-    """Return all starred tracks for authenticated user."""
-    auth_token = get_auth_token()
-    auth_string = 'Bearer {}'.format(auth_token)
-
-    endpoint = 'https://api.spotify.com/v1/me/tracks'
-    header = {'Authorization': auth_string}
-
-    return requests.get(endpoint, headers=header)
-
-
 def get_auth_token():
     """Return authentication token generated using client credentials flow.
 
@@ -45,5 +34,26 @@ def get_auth_token():
     return response.json()['access_token']
 
 
+def spotify_auth_request():
+    """Request user authentication with spotify"""
+    endpoint = 'https://accounts.spotify.com/authorize'
+    payload = {'client_id': auth.SPOTIFY_CLIENT_ID,
+               'response_type': 'code',
+               'scope': 'user-library-read user-top-read',
+               'redirect_uri': 'http://localhost:5000/authcallback'}
+
+    return requests.get(endpoint, params=payload)
+
+
+def get_saved_tracks(user_token):
+    """Return all starred tracks for authenticated user."""
+    auth_string = 'Bearer {}'.format(user_token)
+
+    endpoint = 'https://api.spotify.com/v1/me/tracks'
+    header = {'Authorization': auth_string}
+
+    return requests.get(endpoint, headers=header)
+
+
 if __name__ == '__main__':
-    get_saved_tracks()
+    get_playlists()
