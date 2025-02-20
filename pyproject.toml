@@ -11,9 +11,14 @@ dependencies = [
 dev = [
     "ipdb>=0.13.13",
     "ipython>=8.32.0",
+    "mypy>=1.15.0",
     "ruff>=0.9.6",
+    "types-requests>=2.32.0.20241016",
 ]
 
 [tool.ruff.lint]
 # The default set of rules (from https://docs.astral.sh/ruff/configuration/#configuring-ruff) plus import sorting.
 select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.mypy]
+strict = true
