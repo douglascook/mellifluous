@@ -1,10 +1,7 @@
 import base64
 import json
 import os
-import pathlib
-import sys
-from datetime import datetime
-from typing import Any
+from typing import Any, Iterable
 
 import requests
 
@@ -16,23 +13,19 @@ class SpotifyClient:
 
     def __init__(self) -> None:
         self.token = self.get_auth_token()
-        self.data_dir = pathlib.Path("./data")
 
-    def download_playlist_tracks_metadata(self, user: str, playlist_name: str) -> None:
+    def get_playlist_tracks_metadata(
+        self, user: str, playlist_name: str
+    ) -> Iterable[dict[str, str]]:
         playlist_id = self.get_playlist_id(user, playlist_name)
         endpoint = f"{self.playlist_endpoint}/{playlist_id}"
-
-        now = datetime.now().isoformat(timespec="seconds")
-        output_path = self.data_dir / f"{playlist_name}_{now}.jsonl"
 
         data = self.get_authorised(endpoint)
         next_page = data["tracks"]["href"]
         while next_page:
             print(f"Downloading {next_page}")
             page = self.get_authorised(next_page)
-
-            with output_path.open("a") as f_out:
-                f_out.writelines((f"{json.dumps(t)}\n" for t in page["items"]))
+            yield from page["items"]
 
             next_page = page["next"]
 
@@ -90,9 +83,34 @@ class SpotifyClient:
         return {"Authorization": f"Basic {base64_creds}"}
 
 
-if __name__ == "__main__":
-    _, user, playlist = sys.argv
-    print(f"Downloading {playlist} owned by {user}")
+def parse_track_metadata(line: str) -> dict[str, str]:
+    to_extract: dict[str, list[str]] = {
+        "added_at": ["added_at"],
+        "name": ["track", "name"],
+        "link": ["track", "external_urls", "spotify"],
+        "isrc": ["track", "external_ids", "isrc"],
+        "popularity": ["track", "popularity"],
+        "duration_ms": ["track", "duration_ms"],
+        "album": ["track", "album", "name"],
+        "release_date": ["track", "album", "release_date"],
+        "release_date_precision": ["track", "album", "release_date_precision"],
+    }
 
-    client = SpotifyClient()
-    client.download_playlist_tracks_metadata(user, playlist)
+    metadata = json.loads(line)
+    parsed = {}
+    for name, path in to_extract.items():
+        value = metadata
+        for key in path:
+            value = value.get(key, {})
+        parsed[name] = value
+
+    artists = metadata["track"]["artists"]
+
+    parsed["artist"] = artists[0]["name"]
+    parsed["other_artists"] = "|".join(a["name"] for a in artists[1:])
+
+    # Add dummy month and year to imprecise release dates
+    if parsed.pop("release_date_precision") == "year":
+        parsed["release_date"] = f"{parsed['release_date']}-01-01"
+
+    return parsed

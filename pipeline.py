@@ -1,36 +1,35 @@
+import csv
 import json
 import pathlib
+import sys
+from datetime import datetime
+
+import spotify
+
+DATA_DIR = pathlib.Path("./data")
 
 
-def parse_tracklist_dump(filepath: str) -> None:
-    path = pathlib.Path(filepath)
-    for line in path.open():
-        parse_spotify_track_metadata(line)
+def process_playlist(user: str, playlist: str) -> None:
+    now = datetime.now().isoformat(timespec="seconds")
+    client = spotify.SpotifyClient()
+
+    print(f"Downloading {playlist} owned by {user}")
+    raw_output = DATA_DIR / "raw" / f"{playlist}_{now}.jsonl"
+    with raw_output.open("w") as raw_out:
+        for track in client.get_playlist_tracks_metadata(user, playlist):
+            raw_out.write(json.dumps(track) + "\n")
+
+    print("Cleaning data")
+    clean_output = DATA_DIR / "clean" / f"{playlist}_{now}.csv"
+    with clean_output.open("w") as clean_out:
+        parsed = (spotify.parse_track_metadata(l) for l in raw_output.open("r"))
+        first = next(parsed)
+        writer = csv.DictWriter(clean_out, fieldnames=first.keys())
+        writer.writeheader()
+        writer.writerow(first)
+        writer.writerows(parsed)
 
 
-def parse_spotify_track_metadata(line: str) -> None:
-    to_extract: dict[str, list[str]] = {
-        "added_at": ["added_at"],
-        "name": ["track", "name"],
-        "link": ["track", "external_urls", "spotify"],
-        "isrc": ["track", "external_ids", "isrc"],
-        "popularity": ["track", "popularity"],
-        "duration_ms": ["track", "duration_ms"],
-        "album": ["track", "album", "name"],
-        "release_date": ["track", "album", "release_date"],
-    }
-
-    metadata = json.loads(line)
-    parsed = {}
-    for name, path in to_extract.items():
-        value = metadata
-        for key in path:
-            value = value.get(key, {})
-        parsed[name] = value
-
-    artists = metadata["track"]["artists"]
-
-    parsed["artist"] = artists[0]["name"]
-    parsed["other_artists"] = ",".join(a["name"] for a in artists[1:])
-
-    print(parsed)
+if __name__ == "__main__":
+    _, user, playlist = sys.argv
+    process_playlist(user, playlist)
