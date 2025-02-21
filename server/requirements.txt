@@ -1,3 +1,0 @@
-discogs-client
-flask
-SQLAlchemy
