@@ -1,35 +1,43 @@
-import csv
 import json
 import pathlib
+import sqlite3
 import sys
 from datetime import datetime
 
 import spotify
 
 DATA_DIR = pathlib.Path("./data")
+DB_PATH = "./db/mellifluous.sqlite3"
 
 
-def process_playlist(user: str, playlist: str) -> None:
+def download_playlist_metadata(user: str, playlist: str) -> None:
     now = datetime.now().isoformat(timespec="seconds")
     client = spotify.SpotifyClient()
-
     print(f"Downloading {playlist} owned by {user}")
-    raw_output = DATA_DIR / "raw" / f"{playlist}_{now}.jsonl"
-    with raw_output.open("w") as raw_out:
-        for track in client.get_playlist_tracks_metadata(user, playlist):
-            raw_out.write(json.dumps(track) + "\n")
+    tracks = client.get_playlist_tracks_metadata(user, playlist)
 
-    print("Cleaning data")
-    clean_output = DATA_DIR / "clean" / f"{playlist}_{now}.csv"
-    with clean_output.open("w") as clean_out:
-        parsed = (spotify.parse_track_metadata(l) for l in raw_output.open("r"))
-        first = next(parsed)
-        writer = csv.DictWriter(clean_out, fieldnames=first.keys())
-        writer.writeheader()
-        writer.writerow(first)
-        writer.writerows(parsed)
+    with sqlite3.connect(DB_PATH, autocommit=False) as db:
+        cursor = db.cursor()
+        cursor.execute(
+            """
+            INSERT INTO playlist (name, user, timestamp)
+            VALUES (?, ?, ?)
+            RETURNING id
+        """,
+            (playlist, user, now),
+        )
+        playlist_id = cursor.fetchone()[0]
+
+        for track in tracks:
+            cursor.execute(
+                """
+                INSERT INTO raw_track (playlist_id, metadata)
+                VALUES (?, ?)
+            """,
+                (playlist_id, json.dumps(track).encode()),
+            )
 
 
 if __name__ == "__main__":
     _, user, playlist = sys.argv
-    process_playlist(user, playlist)
+    download_playlist_metadata(user, playlist)

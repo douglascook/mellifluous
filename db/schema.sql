@@ -8,8 +8,7 @@ CREATE TABLE playlist (
 CREATE TABLE raw_track (
   id INTEGER PRIMARY KEY,
   playlist_id INTEGER,
-  -- No JSON type - does this need to be BLOB if using JSONB?
-  metadata TEXT,
+  metadata BLOB,
 
   FOREIGN KEY (playlist_id) REFERENCES playlist(id)
 ) STRICT;
