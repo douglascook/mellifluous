@@ -1,5 +1,5 @@
 __pycache__/
 data/
-.env
-*.sqlite
+.env_secret
+*.sqlite3
 *.DS_Store
