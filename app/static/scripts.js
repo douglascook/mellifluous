@@ -1,20 +1,16 @@
-const ctx = document.getElementById('myChart');
+async function plot(playlistName) {
+  const url = `playlists/${playlistName}`;
+  const data = await fetch(url).then((response) => response.json());
 
-new Chart(ctx, {
-  type: 'bar',
-  data: {
-    labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-    datasets: [{
-      label: '# of Votes',
-      data: [12, 19, 3, 5, 2, 3],
-      borderWidth: 1
-    }]
-  },
-  options: {
-    scales: {
-      y: {
-        beginAtZero: true
-      }
-    }
-  }
-});
+  Plotly.newPlot('release_years',
+    [{x: data.release_years, type: 'histogram', xbins: {size: 1}}],
+    {margin: { t: 0 } }
+  );
+
+  Plotly.newPlot('popularity',
+    [{x: data.popularity, type: 'histogram', xbins: {size: 1}}],
+    {margin: { t: 0 } }
+  );
+}
+
+await plot('bestest');

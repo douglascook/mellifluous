@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Spotift Playlist Analysis</title>
+    <title>Spotify Playlist Visualisation</title>
     <link rel="stylesheet" href="/static/styles.css">
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script type="text/javascript" src="/static/scripts.js" defer></script>
+    <script src="https://cdn.plot.ly/plotly-3.0.0.min.js" charset="utf-8"></script>
+    <script type="module" src="/static/scripts.js" defer></script>
   </head>
 
   <body>
     <h1>
-      Spotify Playlist Analysis
+      Spotify Playlist Visualisation
     </h1>
 
-    <div>
-      <canvas id="myChart"></canvas>
-    </div>
+    <h2> Release Years </h2>
+    <div id="release_years"></div>
+
+    <h2> Current Popularity </h2>
+    <div id="popularity"></div>
 
   </body>
 </html>
