@@ -31,7 +31,10 @@ async def get_playlist_data(name: str) -> Any:
         cursor = db.cursor()
         cursor.execute(
             """
-            SELECT release_date, popularity
+            SELECT
+                release_date,
+                popularity,
+                duration_ms
             FROM track
                 JOIN playlist ON playlist.id = track.playlist_id
             WHERE playlist.name = ?
@@ -41,5 +44,6 @@ async def get_playlist_data(name: str) -> Any:
         for row in cursor:
             data["release_years"].append(int(row["release_date"][:4]))
             data["popularity"].append(int(row["popularity"]))
+            data["length"].append(row["duration_ms"] / 60000)
 
     return data

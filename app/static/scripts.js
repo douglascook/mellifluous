@@ -11,6 +11,11 @@ async function plot(playlistName) {
     [{x: data.popularity, type: 'histogram', xbins: {size: 1}}],
     {margin: { t: 0 } }
   );
+
+  Plotly.newPlot('length',
+    [{x: data.length, type: 'histogram'}],
+    {margin: { t: 0 } }
+  );
 }
 
 await plot('bestest');
