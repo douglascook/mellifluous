@@ -1,5 +1,4 @@
 import base64
-import json
 import os
 from typing import Any, Iterable
 
@@ -83,7 +82,7 @@ class SpotifyClient:
         return {"Authorization": f"Basic {base64_creds}"}
 
 
-def parse_track_metadata(line: str) -> dict[str, str]:
+def parse_track_metadata(metadata: Any) -> dict[str, str]:
     to_extract: dict[str, list[str]] = {
         "added_at": ["added_at"],
         "name": ["track", "name"],
@@ -96,7 +95,6 @@ def parse_track_metadata(line: str) -> dict[str, str]:
         "release_date_precision": ["track", "album", "release_date_precision"],
     }
 
-    metadata = json.loads(line)
     parsed = {}
     for name, path in to_extract.items():
         value = metadata
@@ -105,7 +103,6 @@ def parse_track_metadata(line: str) -> dict[str, str]:
         parsed[name] = value
 
     artists = metadata["track"]["artists"]
-
     parsed["artist"] = artists[0]["name"]
     parsed["other_artists"] = "|".join(a["name"] for a in artists[1:])
 

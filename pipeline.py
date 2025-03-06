@@ -37,6 +37,21 @@ def download_playlist_metadata(user: str, playlist: str) -> None:
                 (playlist_id, json.dumps(track).encode()),
             )
 
+            cleaned = spotify.parse_track_metadata(track)
+            cleaned["playlist_id"] = playlist_id
+            cursor.execute(
+                """
+                INSERT INTO track (
+                    playlist_id, name, link, isrc, artist, other_artists,
+                    album, release_date, duration_ms, popularity, added_at)
+                VALUES (
+                    :playlist_id, :name, :link, :isrc, :artist, :other_artists,
+                    :album, :release_date, :duration_ms, :popularity, :added_at
+                )
+            """,
+                cleaned,
+            )
+
 
 if __name__ == "__main__":
     _, user, playlist = sys.argv

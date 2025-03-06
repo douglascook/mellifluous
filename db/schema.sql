@@ -19,6 +19,7 @@ CREATE TABLE track (
   link TEXT,
   isrc TEXT,
   artist TEXT,
+  other_artists TEXT,
   album TEXT,
   release_date TEXT,
   duration_ms INTEGER,
