@@ -3,6 +3,9 @@ CREATE TABLE playlist (
   id INTEGER PRIMARY KEY,
   name TEXT,
   user TEXT,
+  spotify_id TEXT,
+  -- Snapshot ID can be used to avoid downloading a playlist if it hasn't changed
+  snapshot_id TEXT,
   timestamp TEXT
 ) STRICT;
 

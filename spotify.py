@@ -13,10 +13,9 @@ class SpotifyClient:
     def __init__(self) -> None:
         self.token = self.get_auth_token()
 
-    def get_playlist_tracks_metadata(
-        self, user: str, playlist_name: str
+    def get_tracks_metadata(
+        self, user: str, playlist_id: str
     ) -> Iterable[dict[str, str]]:
-        playlist_id = self.get_playlist_id(user, playlist_name)
         endpoint = f"{self.playlist_endpoint}/{playlist_id}"
 
         data = self.get_authorised(endpoint)
@@ -28,13 +27,14 @@ class SpotifyClient:
 
             next_page = page["next"]
 
-    def get_playlist_id(self, user: str, playlist_name: str) -> str:
+    def get_playlist(self, user: str, playlist_name: str) -> dict[str, str]:
         endpoint = f"{self.user_endpoint}/{user}/playlists"
         data = self.get_authorised(endpoint)
 
         for playlist in data["items"]:
             if playlist["name"] == playlist_name:
-                return str(playlist["id"])
+                assert isinstance(playlist, dict)
+                return playlist
 
         raise ValueError(
             f"Could not find playlist named {playlist_name} for user {user}"

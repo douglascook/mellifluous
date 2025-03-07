@@ -3,6 +3,8 @@ CREATE TABLE playlist (
   id INTEGER PRIMARY KEY,
   name TEXT,
   user TEXT,
+  spotify_id TEXT,
+  snapshot_id TEXT,
   timestamp TEXT
 ) STRICT;
 CREATE TABLE raw_track (
